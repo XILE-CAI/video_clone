@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import LamaTube from "../img/logo.png"
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 // import material icons
 import HomeIcon from '@mui/icons-material/Home';
@@ -97,7 +98,10 @@ const Button = styled.button`
 
 //parameters need to put in {darkMode, setDarkMode} or will not useful
 const Menu = (props) => {
-  return (
+
+    const currentUser = useSelector(state => state.user.currentUser)
+  
+    return (
     <Container>
         <Wrapper>
             <Link to="/" style={{textDecoration:"none",color:"inherit"}}>
@@ -111,14 +115,20 @@ const Menu = (props) => {
                 <HomeIcon />
                 Home
            </Item>
-           <Item>
-                <ExploreOutlinedIcon />
-                Explore
-           </Item>
-           <Item>
-                <SubscriptionsOutlinedIcon />
-                Subscriptions
-           </Item>
+           
+           <Link to="trends" style={{textDecoration:"none",color:"inherit"}}>
+            <Item>
+                    <ExploreOutlinedIcon />
+                    Explore
+            </Item>
+           </Link>
+
+           <Link to="subscriptions" style={{textDecoration:"none",color:"inherit"}}>
+            <Item>
+                    <SubscriptionsOutlinedIcon />
+                    Subscriptions
+            </Item>
+           </Link>
 
            <Hr/>
 
@@ -132,15 +142,19 @@ const Menu = (props) => {
             </Item>
         
             <Hr />
-            <Login>
-                 Sign in to like videos, comment, and subscribe.
-                <Link to="signin" style={{textDecoration:"none"}}>
-                    <Button>
-                        <AccountCircleOutlinedIcon/>SIGN IN
-                    </Button>
-                </Link>
-            </Login>
-            <Hr />
+            {!currentUser &&
+                <>
+                <Login>
+                    Sign in to like videos, comment, and subscribe.
+                    <Link to="signin" style={{textDecoration:"none"}}>
+                        <Button>
+                            <AccountCircleOutlinedIcon/>SIGN IN
+                        </Button>
+                    </Link>
+                </Login>
+                <Hr/>
+                </>
+            }  
 
             <Title>
                 BEST OF LAMATUBE

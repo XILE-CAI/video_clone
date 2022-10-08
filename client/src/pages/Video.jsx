@@ -8,6 +8,13 @@ import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 
 import Card from '../components/Card';
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { dislike, fetchSuccess, like } from "../redux/videoSlice";
+import { subscription } from "../redux/userSlice"; 
+import axios from 'axios';
 
 const Container = styled.div`
     display: flex;
@@ -109,7 +116,46 @@ const Recommendation = styled.div`
     flex:2;
 `;
 
+const VideoFrame = styled.video`
+    max-height: 720px;
+    width: 100%;
+    object-fit: cover;
+`;
+
 const Video = () => {
+    const {currentUser} = useSelector((state) => state.user)
+    const {currentVideo} = useSelector((state) => state.video)
+    const dispatch = useDispatch();
+
+    //video id
+    const path = useLocation().pathname.split("/")[2];
+
+  
+    const [channel, setChannel] = useState({})
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const videoRes = await axios.get(`/videos/find/${path}`)
+                const channelRes = await axios.get(`/users/find/${videoRes.data.userId}`)
+
+             
+                setChannel(channelRes.data)
+                dispatch(fetchSuccess(videoRes.data))
+            } catch (err) {
+                
+            }
+            fetchData()
+        }
+    },[path,dispatch])
+
+    const handleSub = async () => {
+        currentUser.subscribedUsers.includes(channel._id)
+        ? await axios.put(`/users/unsub/${channel._id}`)
+        : await axios.put(`/users/sub/${channel._id}`);
+        dispatch(subscription(channel._id))
+    }
+
   return (
     <Container>
         <Content>
@@ -117,7 +163,7 @@ const Video = () => {
              <iframe
                 width="100%"
                 height="720"
-                src="https://www.youtube.com/embed/k3Vfj-e1Ma4"
+                
                 title="YouTube video player"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -125,10 +171,10 @@ const Video = () => {
             ></iframe>
             </VideoWrapper>
 
-            <Title>Test video</Title>
+            <Title>Tube</Title>
 
             <Details>
-                <Info>7,948,154 views • Jun 22, 2022</Info>
+                <Info>1 views • Jun 22, 2022</Info>
                 
                 <Buttons>
                     <Button>
@@ -162,13 +208,17 @@ const Video = () => {
                         </Description>
                     </ChannelDetail>
                 </ChannelInfo>
-                <Subscribe>SUBSCRIBE</Subscribe>
+                <Subscribe onClick={handleSub}>
+                    {currentUser.subscribedUsers?.includes(channel._id)
+                    ?"SUBSCRIBED"
+                    :"SUBSCRIBE"}
+                </Subscribe>
             </Channel>
 
             <Hr/>
             <Comments/>
         </Content>
-        <Recommendation>
+        {/* <Recommendation>
             <Card type="sm"/>
             <Card type="sm"/>
             <Card type="sm"/>
@@ -181,7 +231,7 @@ const Video = () => {
             <Card type="sm"/>
             <Card type="sm"/>
             <Card type="sm"/>
-        </Recommendation>
+        </Recommendation> */}
     </Container>
   )
 }
